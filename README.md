@@ -164,7 +164,7 @@ module.exports = {
 
 Serve the app:
 
-npx nx serve dashboard --proxy-config=apps/dashboard/proxy.conf.json
+npx nx serve dashboard
 # UI: http://localhost:4200
 
 
