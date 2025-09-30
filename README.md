@@ -37,7 +37,7 @@ Troubleshooting
 Future enhancements
 
 
-Monorepo layout
+**Monorepo layout**
 turbovets/
 
   apps/
