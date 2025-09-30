@@ -7,20 +7,35 @@ A secure, org-scoped task board with role-based access control, drag & drop reor
 This README covers both backend and frontend.
 
 **Table of contents**
+
 Monorepo layout
+
 Tech stack
+
 Features
+
 RBAC model
+
 API surface
+
 Setup & run
+
 Backend (API)
+
 Frontend (Dashboard)
+
 Useful NPM/Nx scripts
+
 Quick smoke tests (curl & PowerShell)
+
 Testing (unit only)
+
 Architecture notes
+
 Troubleshooting
+
 Future enhancements
+
 
 Monorepo layout
 turbovets/
