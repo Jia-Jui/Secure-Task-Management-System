@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>dashboard</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+
+    <!-- Apply saved theme ASAP (before styles/app load) -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (!t) {
+            t =
+              (window.matchMedia &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches)
+                ? 'dark'
+                : 'light';
+            localStorage.setItem('theme', t);
+          }
+          if (t === 'dark') document.documentElement.classList.add('dark');
+        } catch (e) {
+          /* ignore */
+        }
+      })();
+    </script>
+
+    <!-- nicer background color while app boots -->
+    <style>
+      html, body { height: 100%; }
+      body {
+        background: #f8fafc; /* light */
+        color: #0f172a;
+      }
+      .dark body {
+        background: #0a0a0a; /* dark */
+        color: #e5e7eb;
+      }
+    </style>
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>

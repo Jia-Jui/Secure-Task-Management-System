@@ -1,0 +1,27 @@
+# Node / Nx
+node_modules/
+dist/
+tmp/
+coverage/
+.nx/cache/
+.nx/workspace-data/
+
+# Env & local DB
+.env
+*.env
+dev.db
+*.sqlite
+*.sqlite3
+
+# Editor/OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Angular build output
+apps/**/browser/
+apps/**/server/
+
+# Videos / large binaries (don’t commit the walkthrough)
+*.mp4
+*.mov
