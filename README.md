@@ -139,7 +139,9 @@ PORT=3000
 Install & serve
 
 npm i
+
 npx nx serve api
+
 # API: http://localhost:3000/api
 
 
