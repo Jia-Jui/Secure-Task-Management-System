@@ -39,15 +39,25 @@ Future enhancements
 
 Monorepo layout
 turbovets/
+
   apps/
+  
     api/                # NestJS API (JWT, RBAC, tasks)
+    
     dashboard/          # Angular app (Tailwind, NgRx, CDK DnD)
+    
   libs/
+  
     auth/               # RBAC decorators, guards, role→permission map
+    
     data/               # reserved for shared DTOs/Types
+    
   scripts/
+  
     api.ps1             # PowerShell helpers (Windows, optional)
+    
   .env                  # API environment (see below)
+  
   dev.db                # SQLite dev database
 
 **Tech stack**
