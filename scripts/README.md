@@ -35,6 +35,6 @@ Set-Jwt -Email "owner@acme.io" -Password "owner"
 List-Tasks  -OrgId 1                         # ✅
 Create-Task -OrgId 1 -Title "Owner task"     # ✅
 Update-Task -Id 2 -Status in_progress -OrgId 1  # ✅
-Delete-Task -Id 2 -OrgId 1                   # ✅
+Delete-Task -Id 2 -OrgId 1                   # ❌ 403 "Owners can only delete their own tasks"
 List-Tasks  -OrgId 1                         # ✅
 Audit-Log   -OrgId 1                         # ✅
