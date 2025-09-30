@@ -9,7 +9,7 @@ type Status = 'todo' | 'in_progress' | 'done';
 type Task = {
   id: number;
   title: string;
-  description?: string;     // <— added
+  description?: string;
   status: Status;
   creatorEmail?: string;
   position?: number;
@@ -20,9 +20,31 @@ type Task = {
   selector: 'app-tasks',
   imports: [CommonModule, FormsModule, DragDropModule],
   template: `
-  <!-- Page title -->
-  <section class="mb-4">
+  <!-- 403 Popup -->
+  <div *ngIf="popupMsg" class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm grid place-items-center p-6">
+    <div class="w-full max-w-md rounded-2xl bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 shadow-xl p-6">
+      <h2 class="text-lg font-semibold mb-2">Action not allowed</h2>
+      <p class="text-sm text-slate-600 dark:text-slate-300">{{ popupMsg }}</p>
+      <div class="mt-6 flex justify-end">
+        <button (click)="closePopup()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page title + Org switcher -->
+  <section class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
     <h1 class="text-2xl md:text-3xl font-bold tracking-tight">Task</h1>
+
+    <!-- Org switcher (compact) -->
+    <form (ngSubmit)="applyOrg($event)" class="flex items-center gap-2">
+      <label class="text-sm opacity-70">Org ID</label>
+      <input type="number" min="1"
+             [(ngModel)]="orgIdInput" name="orgIdInput"
+             class="w-24 h-9 px-3 rounded-lg text-sm bg-slate-100 dark:bg-white/10
+                    border border-black/10 dark:border-white/10 outline-none" />
+      <button type="submit"
+              class="h-9 px-3 rounded-lg text-sm font-medium text-white bg-indigo-600">Switch</button>
+    </form>
   </section>
 
   <!-- Quick filters: status pills + search -->
@@ -57,7 +79,7 @@ type Task = {
   <!-- Metrics -->
   <section class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
     <div class="rounded-2xl border border-black/5 dark:border-white/10 shadow-sm p-4 bg-white dark:bg-neutral-900">
-      <div class="text-xs text-slate-500 dark:text-slate-400">Task Completed</div>
+      <div class="text-xs text-slate-500 dark:text-slate-400">Task Completed (Org {{orgId}})</div>
       <div class="text-2xl font-semibold">{{ counts.done }}</div>
     </div>
     <div class="rounded-2xl border border-black/5 dark:border-white/10 shadow-sm p-4 bg-white dark:bg-neutral-900">
@@ -74,19 +96,16 @@ type Task = {
   <section class="rounded-2xl border border-black/5 dark:border-white/10 shadow-sm p-4 mb-6 bg-white dark:bg-neutral-900">
     <form (ngSubmit)="onSubmit($event)" novalidate
           class="grid gap-2 md:grid-cols-[minmax(0,520px)_260px] md:items-stretch">
-      <!-- Left: compact inputs -->
       <div class="grid gap-2">
-        <input
-          [(ngModel)]="title" name="title" required
-          placeholder="Task title…"
-          class="text-sm h-10 px-3 rounded-xl bg-slate-100 dark:bg-white/10
-                border border-black/10 dark:border-white/10 outline-none" />
-        <textarea
-          [(ngModel)]="desc" name="desc" rows="2"
-          placeholder="Optional description…"
-          class="text-sm leading-5 min-h-[2.5rem] max-h-24 h-10 px-3 py-2 rounded-xl
-                bg-slate-100 dark:bg-white/10 border border-black/10 dark:border-white/10
-                outline-none resize-y"></textarea>
+        <input [(ngModel)]="title" name="title" required
+               placeholder="Task title…"
+               class="text-sm h-10 px-3 rounded-xl bg-slate-100 dark:bg-white/10
+                      border border-black/10 dark:border-white/10 outline-none" />
+        <textarea [(ngModel)]="desc" name="desc" rows="2"
+                  placeholder="Optional description…"
+                  class="text-sm leading-5 min-h-[2.5rem] max-h-24 h-10 px-3 py-2 rounded-xl
+                         bg-slate-100 dark:bg-white/10 border border-black/10 dark:border-white/10
+                         outline-none resize-y"></textarea>
       </div>
 
       <button type="submit"
@@ -109,29 +128,19 @@ type Task = {
         <article *ngFor="let t of lists[col.key]" cdkDrag
                  class="rounded-xl p-3 border border-black/5 dark:border-white/10
                         bg-gradient-to-br from-white to-slate-50 dark:from-neutral-900 dark:to-neutral-800">
-
-          <!-- title / description / inline edit -->
           <ng-container *ngIf="editingId !== t.id; else editTpl">
-            <header class="text-sm font-medium select-none" (dblclick)="startEdit(t)">
-              {{ t.title }}
-            </header>
-            <p *ngIf="t.description" class="mt-1 text-xs text-slate-600 dark:text-slate-300">
-              {{ t.description }}
-            </p>
+            <header class="text-sm font-medium select-none" (dblclick)="startEdit(t)">{{ t.title }}</header>
+            <p *ngIf="t.description" class="mt-1 text-xs text-slate-600 dark:text-slate-300">{{ t.description }}</p>
           </ng-container>
 
           <ng-template #editTpl>
             <form (ngSubmit)="saveEdit(t)" class="flex flex-col gap-2">
-              <input
-                [(ngModel)]="editTitle" name="editTitle"
-                (keydown.escape)="cancelEdit()"
-                class="w-full px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/10 border border-black/10 dark:border-white/10"
-                placeholder="Title"
-                autofocus />
-              <textarea
-                [(ngModel)]="editDesc" name="editDesc" rows="3"
-                class="w-full px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/10 border border-black/10 dark:border-white/10"
-                placeholder="Description (optional)"></textarea>
+              <input [(ngModel)]="editTitle" name="editTitle" (keydown.escape)="cancelEdit()"
+                     class="w-full px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/10 border border-black/10 dark:border-white/10"
+                     placeholder="Title" autofocus />
+              <textarea [(ngModel)]="editDesc" name="editDesc" rows="3"
+                        class="w-full px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/10 border border-black/10 dark:border-white/10"
+                        placeholder="Description (optional)"></textarea>
               <div class="flex gap-2">
                 <button type="submit" class="text-xs px-3 py-1.5 rounded bg-indigo-600 text-white">Save</button>
                 <button type="button" (click)="cancelEdit()" class="text-xs px-3 py-1.5 rounded border border-black/10 dark:border-white/10">Cancel</button>
@@ -142,7 +151,6 @@ type Task = {
           <div *ngIf="t.creatorEmail" class="text-xs text-slate-500 dark:text-slate-400 mt-1">by {{ t.creatorEmail }}</div>
 
           <footer class="mt-3 flex flex-wrap gap-3">
-            <!-- allow moving forward/backward -->
             <button class="text-slate-500 dark:text-slate-400 text-xs" (click)="mark(t,'todo')">To&nbsp;Do</button>
             <button class="text-blue-500 dark:text-blue-400 text-xs"  (click)="mark(t,'in_progress')">In&nbsp;Progress</button>
             <button class="text-emerald-500 dark:text-emerald-400 text-xs" (click)="mark(t,'done')">Done</button>
@@ -157,9 +165,13 @@ type Task = {
   `
 })
 export class TasksComponent implements OnInit {
+  // org selection
   orgId = 1;
+  orgIdInput = 1;
+  lastGoodOrgId = 1;            // <— tracks last accessible org
+
   title = '';
-  desc = '';                // <— new composer field
+  desc = '';
   tasks: Task[] = [];
 
   // inline edit state
@@ -171,6 +183,9 @@ export class TasksComponent implements OnInit {
   filter = '';
   statusFilter: 'all' | Status = 'all';
 
+  // popup state
+  popupMsg: string | null = null;
+
   columns = [
     { key: 'todo' as const,        label: 'To Do' },
     { key: 'in_progress' as const, label: 'In Progress' },
@@ -181,7 +196,31 @@ export class TasksComponent implements OnInit {
 
   constructor(private api: TasksApi) {}
 
-  ngOnInit() { this.refresh(); }
+  ngOnInit() {
+    const saved = Number(localStorage.getItem('orgId'));
+    if (Number.isFinite(saved) && saved > 0) {
+      this.orgId = saved;
+      this.orgIdInput = saved;
+      this.lastGoodOrgId = saved;
+    } else {
+      this.persistOrg();
+    }
+    this.refresh();
+  }
+
+  private persistOrg() {
+    localStorage.setItem('orgId', String(this.orgId));
+  }
+
+  applyOrg(ev: Event) {
+    ev.preventDefault();
+    const n = Number(this.orgIdInput);
+    if (!Number.isFinite(n) || n < 1) return;
+    if (n === this.orgId) return;
+    this.orgId = n;
+    this.persistOrg();
+    this.refresh(); // will popup + rollback if 403
+  }
 
   get counts() {
     return {
@@ -219,11 +258,38 @@ export class TasksComponent implements OnInit {
   }
 
   refresh() {
-    this.api.list(this.orgId).subscribe(items => {
-      this.tasks = (items as Task[]).map(t => ({ ...t, status: (t.status as Status) ?? 'todo' }));
-      this.rebuild();
+    this.api.list(this.orgId).subscribe({
+      next: (items) => {
+        this.tasks = (items as Task[]).map(t => ({ ...t, status: (t.status as Status) ?? 'todo' }));
+        this.rebuild();
+        // success => remember this org as accessible
+        this.lastGoodOrgId = this.orgId;
+        this.persistOrg();
+      },
+      error: (err) => {
+        console.error('List failed', err);
+        if (err.status === 403) {
+          // revert to last accessible org and inform user
+          const bad = this.orgId;
+          this.openPopup(`You don’t have access to organization ${bad}. Reverting to ${this.lastGoodOrgId}.`);
+          this.orgId = this.lastGoodOrgId;
+          this.orgIdInput = this.lastGoodOrgId;
+          this.persistOrg();
+          // try to reload the last good org so UI is consistent
+          this.api.list(this.orgId).subscribe(items2 => {
+            this.tasks = (items2 as Task[]).map(t => ({ ...t, status: (t.status as Status) ?? 'todo' }));
+            this.rebuild();
+          });
+        } else {
+          alert('Could not load tasks.');
+        }
+      }
     });
   }
+
+  // --- popup helpers
+  openPopup(msg: string) { this.popupMsg = msg; }
+  closePopup() { this.popupMsg = null; }
 
   // --- create
   onSubmit(ev: Event) { ev.preventDefault(); this.add(); }
@@ -236,7 +302,7 @@ export class TasksComponent implements OnInit {
       next: () => { this.title = ''; this.desc = ''; this.refresh(); },
       error: (err) => {
         console.error('Create failed', err);
-        if (err.status === 403) alert('Not allowed for your role.');
+        if (err.status === 403) this.openPopup('Not allowed for your role.');
         else if (err.status === 400) alert('Bad request: ' + (err.error?.message ?? 'invalid payload'));
         else alert('Could not create task.');
       }
@@ -252,33 +318,31 @@ export class TasksComponent implements OnInit {
     if (!newTitle && !newDesc) { this.cancelEdit(); return; }
 
     const old = { title: t.title, description: t.description };
-    // optimistic update
     if (newTitle) t.title = newTitle;
     t.description = newDesc || undefined;
 
     this.api.update(t.id, { title: newTitle || undefined, description: newDesc || undefined }).subscribe({
       next: () => this.cancelEdit(),
       error: (err) => {
-        // rollback
         t.title = old.title;
         t.description = old.description;
         console.error('Update failed', err);
-        if (err.status === 403) alert('Not allowed for your role.');
+        if (err.status === 403) this.openPopup('Not allowed for your role.');
         else alert('Could not save changes.');
       }
     });
   }
 
-  // --- status buttons (forward/backward)
+  // --- status buttons
   mark(t: Task, status: Status) {
     if (t.status === status) return;
     const old = t.status;
-    t.status = status; // optimistic
+    t.status = status;
     this.api.update(t.id, { status }).subscribe({
       next: () => this.refresh(),
       error: (err) => {
         t.status = old;
-        if (err.status === 403) alert('Not allowed for your role.');
+        if (err.status === 403) this.openPopup('Not allowed for your role.');
         else alert('Could not update status.');
       }
     });
@@ -290,7 +354,7 @@ export class TasksComponent implements OnInit {
       next: () => this.refresh(),
       error: (err) => {
         console.error('Delete failed', err);
-        if (err.status === 403) alert('Not allowed for your role.');
+        if (err.status === 403) this.openPopup('Not allowed for your role.');
         else alert('Could not delete task.');
       }
     });
@@ -309,7 +373,8 @@ export class TasksComponent implements OnInit {
     this.api.update(moved.id, payload).subscribe({
       error: (err) => {
         console.error('Reorder/move failed', err);
-        this.refresh(); // rollback by reloading latest
+        if (err.status === 403) this.openPopup('Not allowed for your role.');
+        this.refresh();
       }
     });
   }
