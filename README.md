@@ -122,14 +122,18 @@ JwtGuard validates token and sets req.user
 Auth
 
 POST /api/auth/register           → { id, email }
+
 POST /api/auth/login              → { accessToken }
 
 
 Tasks (secured)
 
 GET    /api/tasks?orgId=1
+
 POST   /api/tasks                 { orgId, title, description? }
+
 PUT    /api/tasks/:id             { title?|description?|status?|position? }
+
 DELETE /api/tasks/:id
 
 
@@ -141,6 +145,7 @@ GET /api/audit-log?orgId=1
 Dev/Debug (non-prod helpers)
 
 POST /api/dev-seed                # create org “Acme”(id=1) & grant caller OWNER (idempotent)
+
 GET  /api/debug/*?orgId=1         # users / orgs / memberships / tasks
 
 **Setup & run**
