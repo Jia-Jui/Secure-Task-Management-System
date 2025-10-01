@@ -276,13 +276,7 @@ Delete-Task -Id 2
 
 **Testing (unit only)**
 
-E2E tests are intentionally omitted.
-
 apps/api/test/rbac.spec.ts – role→permission mapping (hasPermission)
-
-apps/api/test/tasks.service.spec.ts – service behavior (ordering, create defaults, partial update, not found)
-
-apps/api/test/rbac.guard.spec.ts – guard authorization: scope from :id/?orgId, 2-level hierarchy, Viewer/Admin/Owner rules (Owner delete only own)
 
 Run:
 
@@ -330,6 +324,8 @@ Files & Settings routes show ComingSoon overlay
 
 secretOrPrivateKey must have a value
 .env missing or not at repo root. Create it, then restart nx serve api.
+
+(I put it in here since there's no actual key, it should be gitignore)
 
 403 “Organization scope required”
 For list/create, pass ?orgId=1 or { orgId: 1 }.
