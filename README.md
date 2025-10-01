@@ -280,9 +280,30 @@ apps/api/test/rbac.spec.ts – role→permission mapping (hasPermission)
 
 Run:
 
-npm run test:api
-# or a single file:
-nx test api --testFile apps/api/test/rbac.guard.spec.ts
+npm run test api
+
+if this happen: 
+
+PS C:\dev\Full_Stack_Coding_Challenge_Secure_Task\turbovets> npx nx test api
+
+ NX   Failed to process project graph.
+
+The projects in the following directories have no name provided:
+  - .angular/cache/20.3.3/dashboard/vite/deps
+
+Fix (one-time + permanent):
+
+Clear caches
+
+npx nx reset
+
+Re-run
+
+npx nx test api
+
+
+# delete Angular’s cache folder
+Remove-Item -Recurse -Force .angular
 
 **Architecture notes**
 
